@@ -1,0 +1,167 @@
+بالتأكيد. هذه رسالة متكاملة وجاهزة للنسخ، يمكنك إرسالها إلى أي مساعد برمجي (ChatGPT، DeepSeek، Gemini، Copilot، أو أي بوت تطويري) ليقوم ببناء منصة استشارات عربية احترافية متطورة من الصفر، مع حل جميع مشاكل 404 والصفحات الناقصة، وتضمين كل الميزات المطلوبة (محفظة، بوت ذكي، بوت تليجرام، لوحة تحكم، منشورات، خبراء، بث مباشر، جلسات استشارية) وبأعلى مستوى من الجودة والأمان.
+
+الرسالة مكتوبة بطريقة أمرية (directive) لضمان تنفيذها كاملة دون أسئلة إضافية.
+
+---
+
+```text
+START DIRECT IMPLEMENTATION – NO QUESTIONS, NO CLARIFICATIONS.
+
+أنت مطور خبير جداً في Next.js 14 (App Router) و TypeScript و Tailwind CSS و Firebase (Auth, Firestore, Storage) و Gemini API و Telegram Bot API. المطلوب منك بناء منصة استشارات عربية متكاملة، تمثل مزيجاً احترافياً بين Facebook (منشورات، إعجابات، تعليقات)، TikTok (فيديوهات قصيرة، بث مباشر)، و LinkedIn (خبراء، استشارات مدفوعة)، مع إضافة بوت مستشار ذكي (Gemini) وبوت تحكم للمالك عبر Telegram.
+
+## 🎯 المتطلبات النهائية للمشروع (يجب تنفيذها كاملة):
+
+### 1. الهيكل العام للمشروع (يتم إنشاؤه عبر create-next-app مع App Router)
+- استخدم TypeScript، Tailwind CSS، وRTL (اتجاه من اليمين لليسار) في جميع الصفحات.
+- لا تستخدم مجلد `pages`، فقط `app`.
+- قم بإنشاء الملفات التالية بالكامل (بدون اختصار، مع "use client" عند الحاجة):
+
+### 2. الملفات المطلوبة (أكتب كل ملف كاملاً مع مساره):
+
+#### A. `lib/firebase.ts`
+- تهيئة Firebase باستخدام المتغيرات البيئية التالية (ضعها في `.env.local`):
+  - NEXT_PUBLIC_FIREBASE_API_KEY
+  - NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+  - NEXT_PUBLIC_FIREBASE_PROJECT_ID
+  - NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+  - NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+  - NEXT_PUBLIC_FIREBASE_APP_ID
+- قم بتصدير auth, db, storage.
+
+#### B. `lib/gemini.ts`
+- استخدم GoogleGenerativeAI مع مفتاح `NEXT_PUBLIC_GEMINI_API_KEY`.
+- أنشئ دالة `askAI(question, context)` تستخدم نموذج `gemini-1.5-flash`.
+- يجب أن ترد بالعربية الفصيحة، وتوجه المستخدم للخبراء في مجالات: قانون، طب، تقنية، أعمال، تعليم، نفسية.
+- في حال عدم وجود مفتاح، ترجع رسالة "الخدمة غير متاحة حالياً".
+
+#### C. `components/AIConsultantBot.tsx`
+- نافذة عائمة أسفل اليمين (زر دائري بالأسفل).
+- عند الضغط، تظهر نافذة دردشة تحتوي على:
+  - حقل إدخال نصي.
+  - زر إرسال.
+  - عرض ردود البوت.
+  - اقتراحات أسئلة جاهزة (مثلاً "كيف أجد محامياً؟"، "ما هي أفضل منصة للاستشارات التقنية؟").
+- تستخدم دالة askAI.
+- يجب أن تكون موجودة في جميع الصفحات (تضاف في layout أو كل صفحة على حدة).
+
+#### D. `app/wallet/page.tsx` (المحفظة)
+- تعرض الرصيد الحالي للمستخدم (من Firestore).
+- نموذج لطلب شحن الرصيد (بدون شحن حقيقي): إدخال المبلغ، ملاحظة اختيارية، زر "طلب شحن".
+- عند الإرسال، تُضاف وثيقة إلى مجموعة `balanceRequests` بالحقول: userId, amount, note, status: "pending", createdAt.
+- تعرض أيضاً قائمة بطلبات الشحن السابقة للمستخدم وحالتها.
+- معالجة كاملة للأخطاء ورسائل واضحة للمستخدم.
+
+#### E. `app/page.tsx` (الصفحة الرئيسية)
+- فيد يعرض آخر المنشورات (نص وصورة) من Firestore (مجموعة `posts`).
+- نموذج لإضافة منشور جديد (للمستخدمين المسجلين فقط): حقل نصي، رفع صورة، زر نشر.
+- كل منشور يظهر عليه: اسم المستخدم، الصورة الرمزية، الوقت، المحتوى، الصورة المرفقة، أزرار إعجاب (مع عدد)، تعليقات (عدد)، مشاركة.
+- الإعجابات تعمل باستخدام `arrayUnion/arrayRemove` على مصفوفة likes (تحتوي على UID المستخدمين).
+- يتم جلب المنشورات بترتيب تنازلي حسب `createdAt`.
+- تضمين بوت المستشار الذكي في الصفحة.
+
+#### F. `components/PostCard.tsx`
+- بطاقة منشور مستقلة (تستلم post كـ prop).
+- تعرض جميع بيانات المنشور، وتدير حالة الإعجاب محلياً.
+- يجب أن تتعامل مع `post.likes` كمصفوفة دائماً (حتى لو كانت undefined).
+- تحتوي على زر إعجاب يتفاعل مع Firestore.
+
+#### G. `app/(auth)/login/page.tsx` و `app/(auth)/register/page.tsx`
+- نماذج تسجيل دخول وتسجيل باستخدام Firebase Auth (بريد إلكتروني/كلمة مرور).
+- بعد التسجيل، يتم إنشاء وثيقة في `users` (uid, email, displayName, balance: 0, role: "user", createdAt).
+- بعد تسجيل الدخول، التوجيه إلى الصفحة الرئيسية.
+
+#### H. `app/admin/page.tsx` (لوحة تحكم المالك)
+- يجب أن يتحقق من أن المستخدم الحالي له role = "admin" (يمكن تعيين أول مدير يدوياً في Firestore).
+- تعرض:
+  - قائمة بطلبات الشحن (`balanceRequests`) مع أزرار "موافقة" و"رفض".
+  - عند الموافقة، يتم تحديث حالة الطلب إلى "approved" وإضافة المبلغ إلى رصيد المستخدم.
+  - قائمة بجميع المستخدمين مع إمكانية حظرهم أو ترقيتهم إلى مشرف/خبير.
+  - إحصائيات بسيطة (عدد المستخدمين، المنشورات، الطلبات).
+
+#### I. `app/api/bot/route.ts` (بوت تليجرام)
+- نقطة نهاية POST لاستقبال webhook من تليجرام.
+- استخدم `node-telegram-bot-api` (أو fetch مباشرة).
+- يجب أن تتحقق من أن chat_id هو نفسه `ADMIN_TELEGRAM_CHAT_ID` (من .env.local).
+- الأوامر المطلوبة:
+  - `/stats` → إرسال إحصائيات (عدد المستخدمين، المنشورات، الجلسات النشطة).
+  - `/ban [userId]` → حظر مستخدم (تعيين banned: true).
+  - `/unban [userId]` → إلغاء الحظر.
+  - `/setBalance [userId] [amount]` → تعيين رصيد المستخدم.
+  - `/approveBalance [requestId]` → الموافقة على طلب شحن (تعديل الرصيد وتحديث حالة الطلب).
+  - `/help` → عرض قائمة الأوامر.
+- الردود تكون بالعربية.
+
+#### J. `components/Navbar.tsx`
+- شريط علوي يحتوي على:
+  - شعار (نصي) يوجه للرئيسية.
+  - روابط: الرئيسية، المحفظة، لوحة التحكم (تظهر فقط للمالك)، تسجيل خروج/دخول.
+- يعرض اسم المستخدم المسجل أو زر تسجيل الدخول.
+
+#### K. `app/layout.tsx`
+- يضيف `dir="rtl"` و `lang="ar"`.
+- يستخدم `Navbar` في جميع الصفحات.
+- يضيف الخط المناسب (مثل Tajawal) عبر Tailwind أو CSS.
+
+#### L. `app/expert/[id]/page.tsx` (صفحة الخبير)
+- تعرض معلومات الخبير (الاسم، التخصص، السيرة الذاتية، تقييمات).
+- تحتوي على زر "طلب استشارة" يفتح صفحة حجز (يمكن تنفيذها لاحقاً، لكن اترك هيكلاً جاهزاً).
+- تعرض فيديوهات دعائية (من Storage أو رابط خارجي).
+
+#### M. `app/live/[id]/page.tsx` (بث مباشر)
+- هيكل جاهز لدمج WebRTC أو LiveKit (اكتب تعليقات توضيحية).
+- يحتوي على شاشة فيديو، شات مباشر (يمكن تنفيذه لاحقاً).
+
+#### N. `app/session/[id]/page.tsx` (جلسة استشارية)
+- هيكل لجلسة خاصة: تايمر (بالدقائق)، شات نصي، زر إنهاء الجلسة، حساب التكلفة.
+
+### 3. متغيرات البيئة (أنشئ ملف `.env.local.example` يحتوي على):
+```
+
+NEXT_PUBLIC_FIREBASE_API_KEY=your_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=123456789
+NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789:web:abcdef
+NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_key
+ADMIN_TELEGRAM_BOT_TOKEN=your_telegram_bot_token
+ADMIN_TELEGRAM_CHAT_ID=your_chat_id
+
+```
+
+### 4. تعليمات إضافية إلزامية:
+- كل المكونات التي تحتوي على hooks يجب أن تحوي `"use client";`.
+- جميع العمليات غير المتزامنة يجب أن تكون ضمن `try/catch` مع رسائل خطأ مناسبة.
+- يجب أن يكون الكود خالياً تماماً من أخطاء TypeScript.
+- استخدم `react-icons` للأيقونات (FaHeart, FaComment, FaRobot, ...).
+- أضف دعم RTL في `tailwind.config.js` إذا لزم الأمر.
+- يجب أن تعمل المنصة فور نسخ الأكواد وتشغيل `npm install` و `npm run dev`، مع افتراض أن المستخدم سيضيف مفاتيح Firebase و Gemini لاحقاً (في حالة عدم وجودها، تظهر رسائل ودية بدلاً من أخطاء).
+
+### 5. المخرجات المطلوبة:
+أكتب كل ملف من الملفات التالية بالكامل، مع وضع عنوان المسار قبل الكود. لا تختصر أي جزء، ولا تترك أي تعليقات مثل "أضف باقي الكود هنا". قدم الأكواد كاملة وجاهزة للنسخ المباشر.
+
+**قائمة الملفات (بالترتيب):**
+1. `lib/firebase.ts`
+2. `lib/gemini.ts`
+3. `components/AIConsultantBot.tsx`
+4. `app/wallet/page.tsx`
+5. `app/page.tsx`
+6. `components/PostCard.tsx`
+7. `app/(auth)/login/page.tsx`
+8. `app/(auth)/register/page.tsx`
+9. `app/admin/page.tsx`
+10. `app/api/bot/route.ts`
+11. `components/Navbar.tsx`
+12. `app/layout.tsx`
+13. `app/expert/[id]/page.tsx`
+14. `app/live/[id]/page.tsx`
+15. `app/session/[id]/page.tsx`
+16. `.env.local.example`
+17. `README.md` (يشرح خطوات الإعداد والتشغيل، وكيفية تعيين webhook لبوت تليجرام)
+
+**ابدأ فوراً بكتابة الملف الأول ولا تسأل أي أسئلة.**
+```
+
+---
+
+انسخ هذه الرسالة كاملة وأرسلها إلى أي بوت تطويري. سيقوم ببناء المنصة كاملة بالجودة المطلوبة. بعد استلام الأكواد، ضعها في مشروع Next.js الجديد، ثم نفذ npm install و npm run dev.
